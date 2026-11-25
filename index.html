@@ -472,10 +472,8 @@ const LINKS = {
   appleMusic: "https://music.apple.com/br/album/ah-se-eu-pudesse-te-abra%C3%A7ar-ao-vivo-single/1747930718",
   // Contatos de shows no WhatsApp: número só com dígitos, com DDI e DDD. Lista vazia = sem botão de contratação.
   contatos: [
-    { nome: "Arena Prime Produções", fone: "5579998111480", exibe: "(79) 99811-1480",
-      mensagem: "Olá, Arena Prime! Quero contratar o Leandro O Pedreiro para um show." },
-    { nome: "Diego", fone: "557996344817", exibe: "(79) 9634-4817",
-      mensagem: "Olá, Diego! Quero contratar o Leandro O Pedreiro para um show." },
+    { nome: "Soares Produções", fone: "557996344817", exibe: "(79) 9634-4817",
+      mensagem: "Olá, Soares Produções! Quero contratar o Leandro O Pedreiro para um show." },
   ],
   // Pastas opcionais (fotos, mídia kit). Vazio = não aparece.
   fotos: "",
@@ -566,7 +564,7 @@ if (wa) {
     '<a href="' + c.href + '" target="_blank" rel="noopener noreferrer"><b>' + c.nome.replace(/[&<>"]/g, "") + "</b><span>" + c.exibe + "</span></a>").join("")
   const setOpen = (o) => { m.hidden = !o; h.setAttribute("aria-expanded", o ? "true" : "false") }
   h.hidden = false
-  h.addEventListener("click", (e) => { e.stopPropagation(); setOpen(m.hidden) })
+  h.addEventListener("click", (e) => { e.stopPropagation(); if (CONTATOS.length === 1) window.open(CONTATOS[0].href, "_blank", "noopener"); else setOpen(m.hidden) })
   document.addEventListener("click", (e) => { if (!m.hidden && !m.contains(e.target)) setOpen(false) })
   document.addEventListener("keydown", (e) => { if (e.key === "Escape" && !m.hidden) { setOpen(false); h.focus() } })
   m.addEventListener("click", (e) => { if (e.target.closest("a")) setOpen(false) })
