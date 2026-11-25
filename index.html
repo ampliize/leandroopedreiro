@@ -258,6 +258,16 @@ a{color:inherit}
 .hire:hover{background:#25d366;filter:brightness(1.08)}
 @keyframes hire-pulse{0%{box-shadow:0 12px 26px -12px rgba(0,0,0,.55),0 0 0 0 rgba(37,211,102,.55)}
   70%,100%{box-shadow:0 12px 26px -12px rgba(0,0,0,.55),0 0 0 14px rgba(37,211,102,0)}}
+.hire-menu{position:absolute;top:calc(100% + 10px);right:0;z-index:9;min-width:250px;display:flex;flex-direction:column;gap:4px;padding:10px;
+  border-radius:16px;background:rgba(20,12,6,.94);border:1px solid var(--line);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);
+  box-shadow:0 22px 44px -18px rgba(0,0,0,.8);animation:rise .3s cubic-bezier(.2,.7,.1,1) both}
+.hm-k{padding:4px 8px 6px;font:500 10px/1 var(--label);letter-spacing:.18em;text-transform:uppercase;color:var(--ink-soft)}
+.hire-menu a{display:flex;flex-direction:column;gap:3px;padding:10px 12px;border-radius:11px;text-decoration:none;color:var(--ink);
+  background:rgba(37,211,102,.1);border:1px solid rgba(37,211,102,.3);transition:background .2s}
+.hire-menu a:hover,.hire-menu a:focus-visible{background:rgba(37,211,102,.22);outline:none}
+.hire-menu b{font:700 13px/1.1 var(--body)}
+.hire-menu span{font:500 12px/1 var(--label);letter-spacing:.08em;color:#7ef0a6}
+.ctas{display:flex;flex-wrap:wrap;gap:8px}
 .snd .ico-play{display:block}
 .snd .eq{display:none;align-items:flex-end;gap:2px;width:14px;height:14px}
 .snd[aria-pressed=true] .ico-play{display:none}
@@ -407,10 +417,11 @@ a{color:inherit}
     </aside>
 
     <div class="dock" id="dock">
-      <a class="pill hire" id="hire" hidden target="_blank" rel="noopener noreferrer" aria-label="Contratar show pelo WhatsApp">
+      <button class="pill hire" id="hire" type="button" hidden aria-expanded="false" aria-controls="hireMenu" aria-label="Contratar show pelo WhatsApp">
         <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2Zm0 18.2a8.2 8.2 0 0 1-4.2-1.2l-.3-.2-3 .8.8-2.9-.2-.3A8.2 8.2 0 1 1 12 20.2Zm4.5-6.1c-.2-.1-1.5-.7-1.7-.8-.2-.1-.4-.1-.6.1l-.8 1c-.1.2-.3.2-.5.1a6.7 6.7 0 0 1-3.3-2.9c-.3-.4.2-.4.7-1.3.1-.2 0-.3 0-.4l-.8-1.8c-.2-.5-.4-.4-.6-.4h-.5a1 1 0 0 0-.7.3 3 3 0 0 0-.9 2.2 5.2 5.2 0 0 0 1.1 2.7 11.8 11.8 0 0 0 4.5 4c1.7.7 2.3.8 3.2.7a2.7 2.7 0 0 0 1.8-1.3 2.2 2.2 0 0 0 .2-1.3c-.1-.1-.3-.2-.5-.3Z"/></svg>
         <span class="lbl">Contratar show</span>
-      </a>
+      </button>
+      <div class="hire-menu" id="hireMenu" hidden></div>
       <button class="pill" id="toTop" type="button" hidden aria-label="Voltar à capa">
         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 19V5m-6 6 6-6 6 6"/></svg>
         <span class="lbl">Capa</span>
@@ -459,10 +470,13 @@ const LINKS = {
   instagramUser: "@leandroopedreiroo",
   tiktok: "https://www.tiktok.com/@leandrocavichiolioficial",
   appleMusic: "https://music.apple.com/br/album/ah-se-eu-pudesse-te-abra%C3%A7ar-ao-vivo-single/1747930718",
-  // WhatsApp de shows: só dígitos, com DDI e DDD. Vazio = o botão e o disco de contratação não aparecem.
-  whatsapp: "557996344817",
-  whatsappRotulo: "(79) 9634-4817 · Diego",
-  whatsappMensagem: "Olá, Diego! Quero contratar o Leandro O Pedreiro para um show.",
+  // Contatos de shows no WhatsApp: número só com dígitos, com DDI e DDD. Lista vazia = sem botão de contratação.
+  contatos: [
+    { nome: "Arena Prime Produções", fone: "5579998111480", exibe: "(79) 99811-1480",
+      mensagem: "Olá, Arena Prime! Quero contratar o Leandro O Pedreiro para um show." },
+    { nome: "Diego", fone: "557996344817", exibe: "(79) 9634-4817",
+      mensagem: "Olá, Diego! Quero contratar o Leandro O Pedreiro para um show." },
+  ],
   // Pastas opcionais (fotos, mídia kit). Vazio = não aparece.
   fotos: "",
   midiaKit: "",
@@ -520,8 +534,9 @@ const year = (d) => (d ? d.slice(0, 4) : "")
 const br = (d) => (d ? d.slice(8, 10) + "/" + d.slice(5, 7) + "/" + d.slice(0, 4) : "")
 
 const arrowSvg = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17 17 7M8 7h9v9"/></svg>'
-const wa = LINKS.whatsapp.replace(/\D/g, "")
-const waHref = wa ? "https://wa.me/" + wa + "?text=" + encodeURIComponent(LINKS.whatsappMensagem) : ""
+const CONTATOS = LINKS.contatos.filter((c) => c.fone).map((c) => ({ ...c,
+  href: "https://wa.me/" + c.fone.replace(/\D/g, "") + "?text=" + encodeURIComponent(c.mensagem) }))
+const wa = CONTATOS.length > 0
 const ITEMS = []
 CDS.forEach((c, i) => {
   ITEMS.push({ title: c.title, kicker: c.tipo + " · " + br(c.date),
@@ -539,11 +554,23 @@ CDS.forEach((c, i) => {
 })
 ITEMS.push({ title: "Instagram", kicker: "1,6 mi de seguidores", desc: "Das obras para os palcos: bastidores, shows e o dia a dia no perfil oficial.",
   cta: LINKS.instagramUser, href: LINKS.instagram, img: "assets/disco-instagram.webp" })
-if (wa) ITEMS.push({ title: "Contratar show", kicker: "Contratação", desc: "Shows e eventos: " + LINKS.whatsappRotulo + ".",
-  cta: "Chamar no WhatsApp", href: waHref, img: "assets/disco-contato.webp" })
+if (wa) ITEMS.push({ title: "Contratar show", kicker: "Contratação · WhatsApp",
+  desc: "Shows e eventos: " + CONTATOS.map((c) => c.nome + " " + c.exibe.replace(/ /g, "\u00a0")).join(" ou ") + ".",
+  ctas: CONTATOS.map((c) => [c.nome, c.href]), href: CONTATOS.length ? CONTATOS[0].href : "#", img: "assets/disco-contato.webp" })
 if (LINKS.fotos) ITEMS.push({ title: "Fotos", kicker: "Galeria", desc: "A pasta com as fotos oficiais.", cta: "Ver fotos", href: LINKS.fotos, img: "assets/disco-contato.webp" })
 if (LINKS.midiaKit) ITEMS.push({ title: "Mídia kit", kicker: "Materiais", desc: "Logos, release e materiais de divulgação.", cta: "Abrir pasta", href: LINKS.midiaKit, img: "assets/disco-contato.webp" })
-if (wa) { const h = document.getElementById("hire"); h.href = "https://wa.me/" + wa + "?text=" + encodeURIComponent(LINKS.whatsappMensagem); h.hidden = false }
+if (wa) {
+  // o botão verde abre um menu com os contatos de shows
+  const h = document.getElementById("hire"), m = document.getElementById("hireMenu")
+  m.innerHTML = '<span class="hm-k">Contratar show pelo WhatsApp</span>' + CONTATOS.map((c) =>
+    '<a href="' + c.href + '" target="_blank" rel="noopener noreferrer"><b>' + c.nome.replace(/[&<>"]/g, "") + "</b><span>" + c.exibe + "</span></a>").join("")
+  const setOpen = (o) => { m.hidden = !o; h.setAttribute("aria-expanded", o ? "true" : "false") }
+  h.hidden = false
+  h.addEventListener("click", (e) => { e.stopPropagation(); setOpen(m.hidden) })
+  document.addEventListener("click", (e) => { if (!m.hidden && !m.contains(e.target)) setOpen(false) })
+  document.addEventListener("keydown", (e) => { if (e.key === "Escape" && !m.hidden) { setOpen(false); h.focus() } })
+  m.addEventListener("click", (e) => { if (e.target.closest("a")) setOpen(false) })
+}
 const N = ITEMS.length
 
 const $ = (id) => document.getElementById(id)
@@ -600,7 +627,7 @@ const slides = ITEMS.map((it, i) => {
 idx.innerHTML = ITEMS.map((it, i) => '<button type="button" data-k="' + i + '" aria-label="' + esc(it.title) + '" title="' + esc(it.title) + '"></button>').join("")
 idx.addEventListener("click", (e) => { const b = e.target.closest("button"); if (b) goTo(+b.dataset.k) })
 const foot = [["Spotify", LINKS.spotify], ["YouTube", LINKS.youtube], ["Instagram", LINKS.instagram], ["TikTok", LINKS.tiktok], ["Apple Music", LINKS.appleMusic], ["Linktree", LINKS.linktree]]
-if (wa) foot.unshift(["Contratar show", waHref])
+CONTATOS.slice().reverse().forEach((c) => foot.unshift(["Shows: " + c.nome, c.href]))
 if (LINKS.fotos) foot.push(["Fotos", LINKS.fotos])
 if (LINKS.midiaKit) foot.push(["Mídia kit", LINKS.midiaKit])
 $("footLinks").innerHTML = foot.map(([t, h]) => '<li><a href="' + esc(h) + '" target="_blank" rel="noopener noreferrer">' + esc(t) + "</a></li>").join("")
@@ -666,7 +693,9 @@ function renderActive(i) {
     '<h2 class="title" style="--i:' + n++ + '">' + esc(it.title) + "</h2>" +
     '<p class="desc" style="--i:' + n++ + '">' + esc(it.desc) + "</p>" +
     (it.stats ? '<dl class="stats" style="--i:' + n++ + '">' + it.stats.map(([k, v]) => "<div><dt>" + k + "</dt><dd>" + v + "</dd></div>").join("") + "</dl>" : "") +
-    (it.play
+    (it.ctas
+      ? '<div class="ctas" style="--i:' + n++ + '">' + it.ctas.map(([t, h]) => '<a class="cta" href="' + esc(h) + '" target="_blank" rel="noopener noreferrer">' + esc(t) + arrowSvg + "</a>").join("") + "</div>"
+      : it.play
       ? '<button type="button" class="cta" data-play style="--i:' + n++ + ';border:0;cursor:pointer">' + esc(it.cta) + "</button>"
       : '<a class="cta" style="--i:' + n++ + '" href="' + esc(it.href) + '" target="_blank" rel="noopener noreferrer">' + esc(it.cta) + arrowSvg + "</a>")
   head.classList.remove("in"); void head.offsetWidth; head.classList.add("in")
